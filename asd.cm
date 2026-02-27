@@ -1,0 +1,23 @@
+R is 2^(IN*IN);
+
+
+Ajakdw;
+
+awdahwd_adw';
+
+A@0;
+A'_2@n;
+A'@n_c+1;
+
+3;
+2024;
+-10;
+-10.123;
+-25.349;
+2.1234e-23;
+
+"Hello, World!";
+"String with escape sequences: \n\t\\\"\'";
+
+dump <- A(5);
+

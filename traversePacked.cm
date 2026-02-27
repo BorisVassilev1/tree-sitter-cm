@@ -1,0 +1,470 @@
+SYMBOL  is IN;
+ALPHABET is 2^SYMBOL;
+WORD is SYMBOL^*;
+STATE is IN;
+
+Version := "1.0";
+S_ANY := 1000000000;
+S_ANYID:=1000000001;
+Marker := SHL(1,63);
+
+error in IN*STRING -> IN;
+error(l,msg) := l, where
+	print <- "Error in line: ".str(l).": ".msg."\n";
+	assert <- false;
+	;
+
+h2n in IN -> IN;
+h2n(d) := 
+	? d-'0' if (d>='0')/\(d<='9')
+	? d-'a'+10 if (d>='a')/\(d<='f')
+	? d-'A'+10 if (d>='A')/\(d<='F')
+	? 0 otherwise;
+
+getNextSymbol in IN*STRING*IN -> IN*IN;
+getNextSymbol(l,s,p) := 
+	case s[p]='\n' : (1,error(l,"new line in string definition"))
+	case s[p]='\\' : (c',p'), where
+		(c',p') := 
+			case p=|s| : (1,error(l,"file ended before escape sequence is completed"))
+			case s[p+1] = '"' : ('"',p+2)
+			case s[p+1] = 'n' : ('\n',p+2)
+			case s[p+1] = 't' : ('\t',p+2)
+			case s[p+1] = '\\' : ('\\',p+2)
+			case (p+8<=|s|) /\ (forall j in {1..8}:(s[p+j] in {'0'..'9'}\/{'a'..'z'}\/{'A'..'Z'})) : (c'',p+9), where
+				c'' := sum([ h2n(s[p+j])*SHL(1,(8-j)*4) | j in {1..8} ]);
+			otherwise : (1,error(l,"wrong escape sequence"))
+			;
+	otherwise : (s[p],p+1)
+	;
+
+readString in IN * STRING * IN * SYMBOL -> STRING * IN;
+readString(ln,F,p,d) := (v,l+1), where
+	(v,l) := induction
+		step 0: (v@0,l@0) := ([],p);
+		step i+1:
+			(c,l@i+1) := getNextSymbol(ln,F,l@i);
+			v@i+1 := v@i . [c];
+		until (l@i>|F|) \/ (F[l@i]=d)
+		;
+	;
+
+read2Dict in STRING -> ALPHABET * (WORD*WORD)^*;
+read2Dict(s) := (Sigma, D), where
+	//s := loadText(fn);
+	p in IN;
+	(Sigma, D, p) := induction
+		step 0 : (Sigma@0,D@0,p@0) := ({},[],1);
+		step k+1:
+			(u,p') := readString(k+1,s,p@k,'\t');
+			(v,p@k+1) := readString(k+1,s,p','\n');
+			D@k+1 := D@k . [(u,v)];
+			Sigma@k+1 := Sigma@k \/ {c | c in u};
+		until p@k > |s|
+		;
+	;
+
+
+ATRANSITION is STATE * SYMBOL * STATE;
+DTRANSITIONS is STATE*SYMBOL->STATE;
+DFSA is ALPHABET * IN * STATE * 2^STATE * DTRANSITIONS ;
+
+TTRANSITION is STATE * (SYMBOL*SYMBOL) * STATE;
+RTTRANSITION is STATE * (SYMBOL*WORD) * STATE;
+
+TRANSITIONOUT is STATE * SYMBOL -> WORD;
+STATEOUT is STATE -> WORD;
+SSFSTI is ALPHABET * IN * STATE * 2^STATE * DTRANSITIONS * TRANSITIONOUT * WORD * STATEOUT;
+
+OUTSTRING is IN;
+OUTSTRINGS is (OUTSTRING * OUTSTRING)^*;
+
+TRANSITIONOUT_O is STATE * SYMBOL -> OUTSTRING;
+STATEOUT_O is STATE -> OUTSTRING;
+
+BMOUTPUT_I is STATE * SYMBOL * STATE -> IN;
+
+CTRANSITIONS is STATE -> STATE;
+CBMOUTPUT is CTRANSITIONS * DTRANSITIONS * BMOUTPUT_I;
+CDTRANSITIONS is CTRANSITIONS * DTRANSITIONS;
+CDFSA is ALPHABET * IN * STATE * 2^STATE * CDTRANSITIONS;
+CBM is CDFSA * CDFSA * CBMOUTPUT * WORD^*;
+
+FTRANSDUCER is ALPHABET * IN * STATE * DTRANSITIONS * TRANSITIONOUT_O * STATEOUT_O * CTRANSITIONS * OUTSTRINGS * WORD^*;
+
+
+ANOTD is ALPHABET * STATE * DTRANSITIONS * (STATE -> SYMBOL);
+traverseAnotDict in ANOTD * WORD * WORD -> WORD ; 
+traverseAnotDict((Sigma,s,delta,phi),t, out) := w, where
+
+	(q,w) in STATE * WORD;
+	(q,w) := induction
+		step 0 : q@0 := s; w@0 := out;
+		step i+1 :
+			c := t[i+1];
+			(q@i+1,w@i+1) :=
+				? (q',w@i.[c]) if ~!phi(q')
+				? (s, w@i.[c,phi(q')]) otherwise, where 
+					q' :=   ? delta(q@i,c) if !delta(q@i,c)
+						? delta(q@i,S_ANY) if (c ~in Sigma) /\ !delta(q@i,S_ANY)
+						? s otherwise;
+					;
+		until i=|t|;
+	;
+
+
+traverse_SSFSTI in SSFSTI * WORD * WORD -> WORD ;
+traverse_SSFSTI((Sigma,Q,q_0,F,delta,lambda,iota,Psi),I, out) := O.Psi(s), where
+
+	(s,O) in STATE * WORD;
+	(s,O) := induction
+		step 0 : s@0 := q_0; O@0 := out;
+		step i+1 :
+			c := I[i+1];
+			(s@i+1, O@i+1) := (s',O@i.[ if (sigma=S_ANYID,c,sigma) | sigma in w']), where
+				(s',w') := ? (delta(s@i,c),lambda(s@i,c)) if c in Sigma
+					   ? (delta(s@i,S_ANY),lambda(s@i,S_ANY)) if !delta(s@i,S_ANY)
+					   ? (0,[]) otherwise;
+				;
+		until i=|I|;
+	;
+
+
+toWordAdd in WORD * OUTSTRINGS * WORD^* * OUTSTRING -> WORD;
+toWordAdd(S, O, W, n) := 
+	case n=0 : S
+	case AND(Marker,n)=0 : S.W[n]
+	otherwise : toWordAdd(toWordAdd(S,O,W,l), O, W, r), where (l,r):=O[XOR(Marker,n)]; 
+	;
+
+lambda_O in TRANSITIONOUT_O * STATE * SYMBOL -> OUTSTRING;
+lambda_O(lambda,q,sigma) := ? lambda(q,sigma) if !lambda(q,sigma)
+			   ? 0 otherwise;
+
+traverse_FTRANSDUCER in FTRANSDUCER * WORD * WORD -> STRING;
+traverse_FTRANSDUCER((Sigma,Q,q_0,delta,lambda,Phi,f,O,W),T, out) := T'', where
+	(T',q,i) in STRING * STATE * IN;
+	(T',q,i) := induction
+		step 0 : (T'@0,q@0,i@0) := (out,q_0,0);
+		step k+1:
+			c := T[i@k +1];
+			(T'@k+1,q@k+1,i@k+1) :=
+				case !delta(q@k,c) : (toWordAdd(T'@k,O,W,lambda_O(lambda,q@k,c)), delta(q@k,c),i@k +1)
+				case !Phi(q@k) : (toWordAdd(T'@k,O,W,Phi(q@k)), f(q@k), i@k)
+				otherwise : (T'@k.[c], delta(q@k,S_ANY), i@k +1)
+				;
+		until i@k=|T|
+		;
+	q'' in STATE;
+	(T'',q'') := induction
+		step 0 : (T''@0,q''@0) := (T',q);
+		step l+1 : (T''@l+1,q''@l+1) := (toWordAdd(T''@l,O,W,Phi(q''@l)), f(q''@l));
+		until ~!f(q''@l)
+		;
+	;
+
+
+
+decode_delta in CDTRANSITIONS *STATE * SYMBOL -> STATE;
+decode_delta((f,delta'),q,c) := 
+	case !delta'(q,c) : delta'(q,c)
+	otherwise : delta'(k',c'), where
+		k' := OR(f(q), Marker);
+		c' := if(!delta'(k',c),c,0);
+		;
+
+decode_Psi in CBMOUTPUT *STATE * SYMBOL *STATE-> IN;
+decode_Psi((ff,fff,psi'),l,c,r) := 
+	case !psi'(l,c,r) : psi'(l,c,r)
+	case !psi'(OR(ff(l),Marker),c,r) : psi'(OR(ff(l),Marker),c,r)
+	case !psi'(OR(ff(l),Marker),c,OR(fff(ff(l),r),Marker)) : psi'(OR(ff(l),Marker),c,OR(fff(ff(l),r),Marker))
+	otherwise : psi'(OR(ff(l),Marker),Marker,OR(fff(ff(l),r),Marker) );
+
+
+traverse_CBM in CBM * WORD * WORD * STATE^* -> WORD ;
+traverse_CBM(((Sigma_L,L,s_L,F_L,(f_L,delta_L)),(Sigma_R,R,s_R,F_R,(f_R,delta_R)),(ff,fff,psi),W),I, out, SS) := O, where
+	RL in STATE^*;
+	RL := induction
+		step 0 : RL@0 := SS.[s_R];
+		step i+1 : 
+			p := RL@i[|RL@i|];
+			c := I[|I|-i];
+			c' := ? c if  c in Sigma_R
+			      ? S_ANY otherwise;
+		RL@i+1 := RL@i . [decode_delta((f_R,delta_R),p,c')];
+		until i=|I|;
+
+	(O,s) in WORD * STATE;
+	(O,s) := induction
+		step 0 : O@0 := out; s@0 := s_L;
+		step i+1 :
+			c := I[i+1];
+			r := RL[|RL|-i-1];
+			c' := ? c if  c in Sigma_L
+			      ? S_ANY otherwise;
+			o := decode_Psi((ff,fff,psi),s@i,c',r);
+			O@i+1 :=  ? O@i . [if(x=S_ANYID,c,x) | x in W[o] ] if o ~= 0
+		      		  ? O@i . [c] otherwise;
+			s@i+1 := decode_delta((f_L,delta_L),s@i,c');
+		until i=|I|;
+	;
+
+
+A_NA := 300;
+A_FSA := 301;
+A_FST := 302;
+A_SSFSTI := 303;
+A_BM := 304;
+A_RTFST := 305;
+A_FSSFST := 306;
+A_TBM := 307;
+A_ANOTD := 308;
+
+AUT is IN * ALPHABET * IN * STATE * 2^STATE * DTRANSITIONS * 2^TTRANSITION * IN * STATE * DTRANSITIONS * TRANSITIONOUT * STATEOUT  * WORD * BMOUTPUT_I * WORD^* * 2^RTTRANSITION * CTRANSITIONS * CTRANSITIONS * CTRANSITIONS * DTRANSITIONS * OUTSTRINGS * CTRANSITIONS * DTRANSITIONS;
+
+aut2fsa in AUT -> DFSA;
+aut2fsa(A_t,Sigma,Q,q_0,F,delta,Delta',R,s_R,delta_R,lambda,psi,iota,Psi,W,Delta'',f_L,f_R,ff,fff,O,f_tau,delta_tau) := (Sigma,Q,q_0,F,delta);
+aut2ssfsti in AUT -> SSFSTI;
+aut2ssfsti(A_t,Sigma,Q,q_0,F,delta,Delta',R,s_R,delta_R,lambda,psi,iota,Psi,W,Delta'',f_L,f_R,ff,fff,O,f_tau,delta_tau) := (Sigma,Q,q_0,F,delta,lambda,iota,psi);
+aut2bm in AUT -> CBM;
+aut2bm(A_t,Sigma,L,s_L,F,delta_L,Delta',R,s_R,delta_R,lambda,Psi,iota,psi,W,Delta'',f_L,f_R,ff,fff,O,f_tau,delta_tau) := ((Sigma,L,s_L,F,(f_L,delta_L)),(Sigma,R,s_R,F,(f_R,delta_R)),(ff,fff,psi),W);
+aut2fssfst in AUT -> FTRANSDUCER;
+aut2fssfst(A_t,Sigma,Q,q_0,F,delta,Delta',R,s_R,delta_R,lambda,psi,iota,Psi,W,Delta'',f_L,f_R,ff,fff,O,f_tau,delta_tau) := (Sigma,Q,q_0,delta,delta_R,f_L,f_R,O,W);
+aut2anotd in AUT -> ANOTD;
+aut2anotd(A_t,Sigma,L,q_0,F,delta,Delta',R,s_R,delta_R,lambda,Psi,iota,psi,W,Delta'',f_L,f_R,ff,fff,O,phi,delta_tau) := (Sigma,q_0,delta,phi);
+
+
+APACK is AUT^* * IN;
+
+traverseTransducers in APACK * WORD * WORD * STATE^* -> WORD * WORD * STATE^*;
+traverseTransducers((P,D),I',O',SS') := (I, O, SS), where
+	(I, O, SS) := induction
+		step 0 : (I@0, O@0, SS@0) := (I', O', SS');
+		step i+1 : 
+			aut := P[i+1];
+			t := Proj(1,aut);
+
+			(I@i+1, O@i+1, SS@i+1) := 
+				case t=A_SSFSTI : (I'', O'', SS@i), where
+					I'' := traverse_SSFSTI(aut2ssfsti(aut),I@i, O@i);
+					O'' := I@i[1..0];
+				 case t=A_FSSFST : (I'', O'', SS@i), where
+					I'' := traverse_FTRANSDUCER(aut2fssfst(aut),I@i, O@i);
+					O'' := I@i[1..0];
+				 case t=A_ANOTD : (I'', O'', SS@i), where
+					I'' := traverseAnotDict(aut2anotd(aut),I@i, O@i);
+					O'' := I@i[1..0];
+				 case t=A_BM : (I'', O'', SS''), where
+					I'' := traverse_CBM(aut2bm(aut),I@i,O@i,SS@i);
+					O'' := I@i[1..0];
+					SS'' := SS@i[1..0];
+				otherwise : (I@i, O@i, SS@i)
+				;
+		until i=|P|;
+	;
+
+remap_DFSA in DFSA * IN -> DFSA;
+remap_DFSA((Sigma,Q,q_0,F,Delta),Q') := (Sigma,Q,map(q_0),map(F),Delta'), where
+	map in STATE -> STATE;
+	map(q) := q+Q';
+	Delta' := {((map(q),c),map(r)) | ((q,c),r) in Delta};
+	;
+
+extendAlphabet_DFSA in DFSA * ALPHABET -> DFSA;
+extendAlphabet_DFSA((Sigma,Q,q_0,F,Delta),Sigma') := (Sigma \/ N,Q,q_0,F,Delta'), where
+	N := Sigma' \ (Sigma \/ {S_ANY,S_ANYID});
+	Delta' := Delta \/ {((q,c),p) | ((q,S_ANY),p) in Delta, c in N};
+	;
+
+addWord in WORD^* * WORD -> WORD^* * OUTSTRING;
+addWord( W, s) := 
+	case |s|=0 : (W,0) 
+	case s in W : ( W, #(s,W) )
+	otherwise : ( W.[s], si ), where si:=|W|+1;
+	;
+
+addWords in WORD^* * WORD^* -> WORD^* * OUTSTRING^* ;
+addWords(W,S) := (W',S'), where
+	(W',S') := induction
+		step 0 : (W'@0,S'@0) := (W,[]);
+		step k+1 : 
+			(W'@k+1,s) := addWord(W'@k,S[k+1]);
+			S'@k+1 := S'@k . [s] ;
+		until k = |S|;
+	;
+
+concat in OUTSTRINGS * OUTSTRING * OUTSTRING -> OUTSTRINGS * OUTSTRING;
+concat( O, s_1, s_2) :=
+	? ( O, s_2) if s_1 = 0 
+	? ( O, s_1) if s_2 = 0
+	? ( O.[(s_1,s_2)], OR(Marker,o+1) ) otherwise, where o:=|O|;
+	;
+
+FSTATE is STATE * OUTSTRING;
+PSTATE is STATE * FSTATE * (FSTATE * STATE)^*;
+LPSTATE is STATE * FSTATE;
+
+delta_f in DTRANSITIONS * CTRANSITIONS * STATE * SYMBOL -> STATE;
+delta_f(delta,f,q,sigma) := delta(p,sigma), where
+	p in STATE;
+	p := induction
+		step 0 : p@0 := q;
+		step i+1 : p@i+1 := f(p@i);
+		until !delta(p@i,sigma);
+	;
+
+lambda_f in DTRANSITIONS * TRANSITIONOUT_O * STATEOUT_O * CTRANSITIONS * OUTSTRINGS * STATE * SYMBOL -> OUTSTRINGS * OUTSTRING;
+lambda_f(delta,lambda,phi,f,O,q,sigma) := concat(O', gamma , lambda_O(lambda,p,sigma)), where
+	(O',gamma,p) in OUTSTRINGS * OUTSTRING * STATE;
+	(O',gamma,p) := induction
+		step 0 : (O'@0,gamma@0,p@0) := (O,0,q);
+		step i+1 : ((O'@i+1,gamma@i+1),p@i+1) := (concat(O'@i,gamma@i,phi(p@i)),f(p@i));
+		until !delta(p@i,sigma);
+	;
+
+addChain in IN * STATE * DTRANSITIONS * WORD -> IN * STATE * DTRANSITIONS;
+addChain(Q,q_0,delta,w) := (Q',q,delta'), where
+	(Q',q,delta') := induction
+		step 0 : (Q'@0,q@0,delta'@0) := (Q,q_0,delta);
+		step i+1 : (Q'@i+1,q@i+1,delta'@i+1) :=
+				case ! delta'@i(q@i,w[i+1]) : (Q'@i,delta'@i(q@i,w[i+1]),delta'@i)
+				otherwise : (Q'@i +1,q',delta'@i \/ {((q@i,w[i+1]),q')}), where q' := Q'@i + 1;
+				;
+		until i = |w|;
+	;
+
+trieTransducer in ALPHABET * (WORD*WORD)^* -> FTRANSDUCER;
+trieTransducer(Sigma_D,D) := addPair2FTrie^*((Sigma_D, 1, 1, {}, {}, {}, {}, [], []), D), where
+	addPair2FTrie in FTRANSDUCER * (WORD*WORD) -> FTRANSDUCER ;
+	addPair2FTrie((Sigma,Q,q_0,delta,lambda,Phi,f,O,W),(alpha,beta)) := (Sigma,Q',q_0,delta',lambda,Phi \/ {(q',beta')},f,O,W'), where
+		(Q',q',delta') := addChain(Q,q_0,delta,alpha);
+		(W',beta') := addWord(W,beta);
+		;
+
+	;
+
+LlmlTransducer in (ALPHABET * (WORD*WORD)^*) * DFSA -> FTRANSDUCER;
+LlmlTransducer((Sigma_D,D),A_L) := T, where
+//print <- "Start lml transducer construction\n";
+	(Sigma_T, Q_T, t_0, delta_T, lambda_T, Phi_T, f_T, O_T, W_T) := trieTransducer(Sigma_D,D);
+	(Sigma, Q_L, l_0, F_L, delta_L) := remap_DFSA(extendAlphabet_DFSA(A_L,Sigma_D),Q_T);
+
+	nextState in FTRANSDUCER * 2^LPSTATE * LPSTATE * SYMBOL -> LPSTATE * OUTSTRINGS;
+	nextState((Sigma, Q, q_0, delta, lambda, Phi, f, O, W),S,(q,(p,gamma)),sigma) :=
+		case !Phi_T(delta_T(q,sigma)) : ((delta_T(q,sigma),(#((l'',(0,0)),S as LPSTATE^*), Phi_T(delta_T(q,sigma)))), O), where
+			l' in STATE;
+			l' := induction
+				step 0 : l'@0 := p;
+				step k+1 : l'@k+1 := f(l'@k);
+				until (Proj(1,(S as LPSTATE^*)[l'@k]) > Q_T);
+			l'' := delta_L(Proj(1,(S as LPSTATE^*)[l']),sigma);
+		otherwise : ( ( delta_T(q,sigma) , (delta_f(delta,f,p,sigma),gamma_2)),O_2), where
+			(O_1,gamma_1) := lambda_f(delta,lambda,Phi,f,O,p,sigma);
+			(O_2,gamma_2) := concat(O_1,gamma,gamma_1);
+		;
+
+	addSymbol2X in IN * (FTRANSDUCER * 2^LPSTATE) * SYMBOL -> (FTRANSDUCER * 2^LPSTATE);
+	addSymbol2X(p,((Sigma, Q, q_0, delta, lambda, Phi, f, O, W),S),sigma) := ((Sigma, Q, q_0, delta \/ {((p,sigma),ni)}, lambda, Phi, f, O', W), S'), where
+		(n,O') := nextState((Sigma, Q, q_0, delta, lambda, Phi, f, O, W),S,(S as LPSTATE^*)[p],sigma);
+		S' := S \/ {n};
+		ni := #(n,S' as LPSTATE^*);
+		;
+
+	S in  2^LPSTATE;
+	(T,S) := induction
+		step 0 :
+
+			(W,A) := addWords(W_T,[ [(Sigma as SYMBOL^*)[i]]| i in {1 .. |Sigma|}]);
+			O_Sigma in SYMBOL -> OUTSTRING;
+			O_Sigma := { ((Sigma as SYMBOL^*)[i],A[i]) | i in {1 .. |Sigma|}};
+
+			S' in 2^LPSTATE;
+			S' := {(l,(0,0)) | l in {Q_T+1..Q_T+Q_L}};
+
+			q_0 := #((l_0,(0,0)), S' as LPSTATE^*);
+
+			delta_0 in STATE*SYMBOL*2^LPSTATE -> LPSTATE;
+			delta_0(l,sigma,S) :=
+				case (l in F_L) /\ !delta_T(t_0, sigma) : (t', (l', gamma')), where
+					t':=delta_T(t_0, sigma);
+					l' := #((delta_L(l,sigma),(0,0)),S as LPSTATE^*);
+					gamma' := ? Phi_T(t') if ! Phi_T(t')
+						  ? O_Sigma(sigma) otherwise;
+				otherwise : (delta_L(l,sigma),(0,0))
+				;
+
+			S@0 := S' \/ { delta_0(l,sigma,S') | sigma in Sigma & !delta_T(t_0,sigma), l in F_L};
+
+			T@0 := (Sigma, |S'|, q_0, delta, lambda, {}, {}, O_T,W), where
+				delta := { (( #((l,(0,0)),S@0 as LPSTATE^*), sigma), #(delta_0(l,sigma,S@0), S@0 as LPSTATE^*) ) | l in {Q_T+1..Q_T+Q_L}, sigma in Sigma};
+				lambda := { (( #( (l,(0,0)),S@0 as LPSTATE^*), sigma), O_Sigma(sigma) ) | l in {Q_T+1..Q_T+Q_L}, sigma in Sigma & (l ~in F_L) \/ ~!delta_T(t_0, sigma)};
+				;
+		step i+1 :
+//x := case i rem 100000 = 0 : 1, where print <- "i=".str(i)."\n"; otherwise : 0 ;
+			p := i+Q_L+1;
+			(q,q_f) := (S@i as LPSTATE^*)[p];
+			(Sigma, Q, q_0, delta, lambda, Phi, f, O, W) := T@i;
+
+			(T@i+1,S@i+1) := addSymbol2X(p)^*(
+				((Sigma,Q+1,q_0,delta,lambda,Phi \/ {(p,Proj(2,q_f))},f \/ {(p,Proj(1,q_f))},O,W),S@i),
+				[ sigma | sigma in Sigma & !delta_T(q,sigma) ] );
+
+		until i+Q_L=|S@i|;
+
+	;
+
+fssfst2aut in FTRANSDUCER -> AUT;
+fssfst2aut(Sigma,Q,q_0,delta,lambda,Phi,f,O,W) := (A_FSSFST,Sigma,Q,q_0,{},delta,{},0,0,lambda,{},{},[],{},W,{},Phi,f,{},{},O,{},{});
+
+
+constructUserDictionaryA in AUT * STRING -> AUT;
+constructUserDictionaryA(aut, s) := fssfst2aut(userDic), where
+	OL, SL in IN^*;
+	OL := []; SL := [];
+
+	procText := traverse_CBM(aut2bm(aut),s,OL,SL);
+
+	(Sigma, D) := read2Dict(procText);
+	D' := [ ([tokentag].ls[2..|ls|-1].[tokentag], ls[1..|ls|-1].rs.[ls[|ls|]]) | (ls,rs) in D, tokentag in {65539..65573} ];
+	Sigma' := Sigma \/ {65539..65573};
+	
+	A in DFSA;
+	A := ({S_ANY}, 1, 1, {1}, {((1,S_ANY),1)}) ;
+
+	userDic := LlmlTransducer((Sigma', D'),A);
+	;
+
+constructUserDictionary in STRING * STRING * STRING -> IB;
+constructUserDictionary(machineFIleName, inputFileName, outputFileName) := true, where
+	aut in AUT;
+	aut := restoreBin(machineFIleName);
+
+	s := loadText(inputFileName);
+
+	storeBin <- (outputFileName, constructUserDictionaryA(aut, s));
+	;
+
+changeDictionary in APACK * AUT -> APACK;
+changeDictionary((P,DI), DIC) := (subst(P,DI,DIC),DI);
+
+//X := case false : 0, where
+
+	I:="Това е тест. This is a test. ";
+	O:="";
+	SS:="";
+
+	packedRules in APACK;
+	packedRules := restoreBin(argv(1));
+	(I',O',SS') := traverseTransducers(packedRules,I,O,SS);
+	//print <- I'.O'.SS'."\n";
+	print <- I'."\n";
+
+	Y := Proj(1,packedRules)[1];
+	ppp := changeDictionary(packedRules,Y);
+
+	//machineFIleName := "procdic.bmt";
+	//inputFileName := "userDic.txt";
+	//outputFileName := "userDic.dic";
+	//U := constructUserDictionary(machineFIleName, inputFileName, outputFileName);
+	//otherwise : 0;
+

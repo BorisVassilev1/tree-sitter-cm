@@ -1,0 +1,25 @@
+{
+  "name": "tree-sitter-cm",
+  "version": "0.1.0",
+  "description": "Grammar for the C(M) programming language created in BAS (Bulgarian Academy of Sciences)",
+  "main": "bindings/node/",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "tree-sitter": [
+  {
+    "scope": "source.cm",
+    "file-types": [
+      "cm"
+    ],
+    "injection-regex": "cm",
+    "highlights": [
+      "queries/highlights.scm"
+    ]
+  }
+]
+}

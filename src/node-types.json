@@ -1,0 +1,880 @@
+[
+  {
+    "type": "AddOp",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "arrow",
+          "named": true
+        },
+        {
+          "type": "cap",
+          "named": true
+        },
+        {
+          "type": "cup",
+          "named": true
+        },
+        {
+          "type": "eqv",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Aexpr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "Case",
+          "named": true
+        },
+        {
+          "type": "Char",
+          "named": true
+        },
+        {
+          "type": "Expr",
+          "named": true
+        },
+        {
+          "type": "Exprl",
+          "named": true
+        },
+        {
+          "type": "Id",
+          "named": true
+        },
+        {
+          "type": "IndId",
+          "named": true
+        },
+        {
+          "type": "Natural",
+          "named": true
+        },
+        {
+          "type": "Quantor",
+          "named": true
+        },
+        {
+          "type": "Real",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "TermExprl",
+          "named": true
+        },
+        {
+          "type": "clmat",
+          "named": true
+        },
+        {
+          "type": "dd",
+          "named": true
+        },
+        {
+          "type": "func",
+          "named": true
+        },
+        {
+          "type": "if",
+          "named": true
+        },
+        {
+          "type": "opmat",
+          "named": true
+        },
+        {
+          "type": "proj",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Assignment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Expr",
+          "named": true
+        },
+        {
+          "type": "Id",
+          "named": true
+        },
+        {
+          "type": "Natural",
+          "named": true
+        },
+        {
+          "type": "StmtL",
+          "named": true
+        },
+        {
+          "type": "case",
+          "named": true
+        },
+        {
+          "type": "induction",
+          "named": true
+        },
+        {
+          "type": "otherwise",
+          "named": true
+        },
+        {
+          "type": "step",
+          "named": true
+        },
+        {
+          "type": "until",
+          "named": true
+        },
+        {
+          "type": "where",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Btype",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Btype",
+          "named": true
+        },
+        {
+          "type": "Id",
+          "named": true
+        },
+        {
+          "type": "Natural",
+          "named": true
+        },
+        {
+          "type": "Type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Case",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Case",
+          "named": true
+        },
+        {
+          "type": "Expr",
+          "named": true
+        },
+        {
+          "type": "defined",
+          "named": true
+        },
+        {
+          "type": "if",
+          "named": true
+        },
+        {
+          "type": "otherwise",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Ctype",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Btype",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Dtype",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Ctype",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "EqOp",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "ge",
+          "named": true
+        },
+        {
+          "type": "in",
+          "named": true
+        },
+        {
+          "type": "le",
+          "named": true
+        },
+        {
+          "type": "meets",
+          "named": true
+        },
+        {
+          "type": "subset",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Expr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "AddOp",
+          "named": true
+        },
+        {
+          "type": "Aexpr",
+          "named": true
+        },
+        {
+          "type": "EqOp",
+          "named": true
+        },
+        {
+          "type": "MulOp",
+          "named": true
+        },
+        {
+          "type": "PosOp",
+          "named": true
+        },
+        {
+          "type": "Type",
+          "named": true
+        },
+        {
+          "type": "UnOp",
+          "named": true
+        },
+        {
+          "type": "as",
+          "named": true
+        },
+        {
+          "type": "newrow",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Exprl",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Expr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Id",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "IndId",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "MulOp",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "rem",
+          "named": true
+        },
+        {
+          "type": "restr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "PosOp",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "Expr",
+          "named": true
+        },
+        {
+          "type": "Exprl",
+          "named": true
+        },
+        {
+          "type": "dd",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Quantor",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "exists",
+          "named": true
+        },
+        {
+          "type": "forall",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Stmt",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Assignment",
+          "named": true
+        },
+        {
+          "type": "Expr",
+          "named": true
+        },
+        {
+          "type": "Term",
+          "named": true
+        },
+        {
+          "type": "TermL",
+          "named": true
+        },
+        {
+          "type": "Type",
+          "named": true
+        },
+        {
+          "type": "def",
+          "named": true
+        },
+        {
+          "type": "in",
+          "named": true
+        },
+        {
+          "type": "is",
+          "named": true
+        },
+        {
+          "type": "larrow",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "StmtL",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Stmt",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Term",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "Id",
+          "named": true
+        },
+        {
+          "type": "IndId",
+          "named": true
+        },
+        {
+          "type": "Natural",
+          "named": true
+        },
+        {
+          "type": "Real",
+          "named": true
+        },
+        {
+          "type": "String",
+          "named": true
+        },
+        {
+          "type": "TermL",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "TermExpr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Expr",
+          "named": true
+        },
+        {
+          "type": "Term",
+          "named": true
+        },
+        {
+          "type": "in",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "TermExprl",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "TermExpr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "TermL",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Term",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "Type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "Dtype",
+          "named": true
+        },
+        {
+          "type": "arrow",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "UnOp",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "cup",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "source_file",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "StmtL",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "\n",
+    "named": false
+  },
+  {
+    "type": "!",
+    "named": false
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "&",
+    "named": false
+  },
+  {
+    "type": "(",
+    "named": false
+  },
+  {
+    "type": ")",
+    "named": false
+  },
+  {
+    "type": "*",
+    "named": false
+  },
+  {
+    "type": "+",
+    "named": false
+  },
+  {
+    "type": "+1",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": ".",
+    "named": false
+  },
+  {
+    "type": "/",
+    "named": false
+  },
+  {
+    "type": "0",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": ";",
+    "named": false
+  },
+  {
+    "type": "<",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": ">",
+    "named": false
+  },
+  {
+    "type": "?",
+    "named": false
+  },
+  {
+    "type": "@",
+    "named": false
+  },
+  {
+    "type": "Char",
+    "named": true
+  },
+  {
+    "type": "Comment",
+    "named": true,
+    "extra": true
+  },
+  {
+    "type": "Natural",
+    "named": true
+  },
+  {
+    "type": "Real",
+    "named": true
+  },
+  {
+    "type": "String",
+    "named": true
+  },
+  {
+    "type": "[",
+    "named": false
+  },
+  {
+    "type": "\\\\",
+    "named": false
+  },
+  {
+    "type": "]",
+    "named": false
+  },
+  {
+    "type": "^",
+    "named": false
+  },
+  {
+    "type": "^*",
+    "named": false
+  },
+  {
+    "type": "arrow",
+    "named": true
+  },
+  {
+    "type": "as",
+    "named": true
+  },
+  {
+    "type": "cap",
+    "named": true
+  },
+  {
+    "type": "case",
+    "named": true
+  },
+  {
+    "type": "clmat",
+    "named": true
+  },
+  {
+    "type": "cup",
+    "named": true
+  },
+  {
+    "type": "dd",
+    "named": true
+  },
+  {
+    "type": "def",
+    "named": true
+  },
+  {
+    "type": "defined",
+    "named": true
+  },
+  {
+    "type": "eqv",
+    "named": true
+  },
+  {
+    "type": "exists",
+    "named": true
+  },
+  {
+    "type": "forall",
+    "named": true
+  },
+  {
+    "type": "func",
+    "named": true
+  },
+  {
+    "type": "ge",
+    "named": true
+  },
+  {
+    "type": "if",
+    "named": true
+  },
+  {
+    "type": "in",
+    "named": true
+  },
+  {
+    "type": "induction",
+    "named": true
+  },
+  {
+    "type": "is",
+    "named": true
+  },
+  {
+    "type": "larrow",
+    "named": true
+  },
+  {
+    "type": "le",
+    "named": true
+  },
+  {
+    "type": "meets",
+    "named": true
+  },
+  {
+    "type": "newrow",
+    "named": true
+  },
+  {
+    "type": "opmat",
+    "named": true
+  },
+  {
+    "type": "otherwise",
+    "named": true
+  },
+  {
+    "type": "proj",
+    "named": true
+  },
+  {
+    "type": "rem",
+    "named": true
+  },
+  {
+    "type": "restr",
+    "named": true
+  },
+  {
+    "type": "step",
+    "named": true
+  },
+  {
+    "type": "subset",
+    "named": true
+  },
+  {
+    "type": "until",
+    "named": true
+  },
+  {
+    "type": "where",
+    "named": true
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "|",
+    "named": false
+  },
+  {
+    "type": "}",
+    "named": false
+  },
+  {
+    "type": "~",
+    "named": false
+  },
+  {
+    "type": "‘",
+    "named": false
+  }
+]

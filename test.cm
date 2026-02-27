@@ -1,0 +1,49 @@
+R is 2^(IN*IN);
+// dakjdkwadj
+closure in R -> R;
+closure(A) := T, where
+	T := induction
+		step 0:
+			T@0 := A;
+		step n+1:
+			T@n+1 := T@n \/ {(a,c) | (a,b) in T@n, (b,c) in A};
+		until forall (a,b) in T@n, (b,c) in A : ((a,c) in T@n)
+	;
+;
+dump <- closure({(1,2),(2,3),(3,5),(5,10)});
+
+Marker := SHL(1,63);
+
+error in IN*STRING -> IN;
+error(l,msg) := l, where
+	print <- "Error in line: ".str(l).": ".msg."\n";
+	assert <- false;
+	;
+
+
+h2n in IN -> IN;
+h2n(d) := 
+	? d-'0' if (d>='0')/\(d<='9')
+	? d-'a'+10 if (d>='a')/\(d<='f')
+	? d-'A'+10 if (d>='A')/\(d<='F')
+	? 0 otherwise;
+
+
+getNextSymbol in IN*STRING*IN -> IN*IN;
+getNextSymbol(l,s,p) := 
+	case s[p]='\n' : (1,error(l,"new line in string definition"))
+	case s[p]='\\' : (c',p'), where
+		(c',p') := 
+			case p=|s| : (1,error(l,"file ended before escape sequence is completed"))
+			case s[p+1] = '"' : ('"',p+2)
+			case s[p+1] = 'n' : ('\n',p+2)
+			case s[p+1] = 't' : ('\t',p+2)
+			case s[p+1] = '\\' : ('\\',p+2)
+			case (p+8<=|s|) /\ (forall j in {1..8}:(s[p+j] in {'0'..'9'}\/{'a'..'z'}\/{'A'..'Z'})) : (c'',p+9), where
+				c'' := sum([ h2n(s[p+j])*SHL(1,(8-j)*4) | j in {1..8} ]);
+			otherwise : (1,error(l,"wrong escape sequence"))
+			;
+	otherwise : (s[p],p+1)
+	;
+
+
