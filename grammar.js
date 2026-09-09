@@ -57,18 +57,22 @@ module.exports = grammar({
 
     Id: $ => $._Id,
     _Id: $ => /[a-zA-Z][a-zA-Z0-9_']*/,
-    IndId: $ => seq($._Id, '@', choice(
-      seq($._Id, optional('+1')),
-      '0'
-    )),
 
-    Natural: $ => /[-+]?[1-9][0-9]*|0|'.'/,
-    Real: $ => /[-+]?(?:[0-9]+\.[0-9]*|[0-9]*\.[0-9]+)(?:[eE][-+]?[0-9]+)?/,
+    IndIdTag: $ => seq('@', choice(
+      $.Natural,
+      seq($._Id, optional('+1'))
+    )),
+    IndId: $ => seq($._Id, $.IndIdTag),
+
+    Natural: $ => /[-+]?[1-9][0-9]*|0|'([^'\\]|\\.)*'/,
+
+    // fractional digits are required after '.', so `{1..8}` stays two tokens
+    // (Natural, dd) instead of being eaten as `1.` `.` `8`.
+    Real: $ => /[-+]?(?:[0-9]+\.[0-9]+(?:[eE][-+]?[0-9]+)?|\.[0-9]+(?:[eE][-+]?[0-9]+)?|[0-9]+[eE][-+]?[0-9]+)/,
     String: $ => /"([^"\\]|\\.)*"/,
-    Char: $ => /'([^'\\]|\\.)*'/,
 
     UnOp: $ => choice('+', '-', $.cup, '!', '~', '.'),
-    MulOp: $ => choice('/', '\\\\', $.restr, $.rem, 
+    MulOp: $ => choice('/', '\\', $.restr, $.rem,
         seq('.', optional(choice('*', '/', '^')))
     ),
     AddOp: $ => choice('+', '-', $.cap, $.cup, $.arrow, $.eqv),
@@ -90,7 +94,6 @@ module.exports = grammar({
       $.Natural,
       $.Real,
       $.String,
-      $.Char,
       $.Id,
       $.IndId,
       $.Case,
@@ -113,7 +116,6 @@ module.exports = grammar({
       seq($.Quantor, $.TermExprl, ':', '(', $.Expr, ')')
     )),
     
-    //Case: $ => seq('?', $.Expr, $.if, choice($.defined, $.Expr), choice($.otherwise, $.Case)),
     Case: $ => seq('?', $.Expr, choice(
       seq($.if, choice($.defined, $.Expr), $.Case),
       $.otherwise
@@ -121,6 +123,7 @@ module.exports = grammar({
     PosOp: $ => choice(
       seq('(', $.Exprl, ')'),
       seq('[', $.Expr, optional(choice(seq($.dd, $.Expr), seq(',', $.Expr))), ']'),
+      '^*', // function iteration not documented
       '‘'
     ),
     _PosExpr: $ => seq($.Aexpr, repeat($.PosOp)),
@@ -155,9 +158,9 @@ module.exports = grammar({
         optional(seq($.otherwise, ':', $.Expr, optional(seq(',', $.where, $.StmtL))))
       ),
       seq(
-        $.induction, '\n', 
-        $.step, $.Natural, ':', $.StmtL, '\n',
-        $.step, $.Id, '+', $.Natural, ':', $.StmtL, '\n', 
+        $.induction,
+        $.step, $.Natural, ':', $.StmtL,
+        $.step, $.Id, '+', $.Natural, ':', $.StmtL,
         $.until, $.Expr
       )
     ),

@@ -138,13 +138,9 @@
       "type": "PATTERN",
       "value": "[a-zA-Z][a-zA-Z0-9_']*"
     },
-    "IndId": {
+    "IndIdTag": {
       "type": "SEQ",
       "members": [
-        {
-          "type": "SYMBOL",
-          "name": "_Id"
-        },
         {
           "type": "STRING",
           "value": "@"
@@ -152,6 +148,10 @@
         {
           "type": "CHOICE",
           "members": [
+            {
+              "type": "SYMBOL",
+              "name": "Natural"
+            },
             {
               "type": "SEQ",
               "members": [
@@ -172,30 +172,35 @@
                   ]
                 }
               ]
-            },
-            {
-              "type": "STRING",
-              "value": "0"
             }
           ]
         }
       ]
     },
+    "IndId": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_Id"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "IndIdTag"
+        }
+      ]
+    },
     "Natural": {
       "type": "PATTERN",
-      "value": "[-+]?[1-9][0-9]*|0|'.'"
+      "value": "[-+]?[1-9][0-9]*|0|'([^'\\\\]|\\\\.)*'"
     },
     "Real": {
       "type": "PATTERN",
-      "value": "[-+]?(?:[0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)(?:[eE][-+]?[0-9]+)?"
+      "value": "[-+]?(?:[0-9]+\\.[0-9]+(?:[eE][-+]?[0-9]+)?|\\.[0-9]+(?:[eE][-+]?[0-9]+)?|[0-9]+[eE][-+]?[0-9]+)"
     },
     "String": {
       "type": "PATTERN",
       "value": "\"([^\"\\\\]|\\\\.)*\""
-    },
-    "Char": {
-      "type": "PATTERN",
-      "value": "'([^'\\\\]|\\\\.)*'"
     },
     "UnOp": {
       "type": "CHOICE",
@@ -235,7 +240,7 @@
         },
         {
           "type": "STRING",
-          "value": "\\\\"
+          "value": "\\"
         },
         {
           "type": "SYMBOL",
@@ -546,10 +551,6 @@
           {
             "type": "SYMBOL",
             "name": "String"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "Char"
           },
           {
             "type": "SYMBOL",
@@ -1131,6 +1132,10 @@
         },
         {
           "type": "STRING",
+          "value": "^*"
+        },
+        {
+          "type": "STRING",
           "value": "‘"
         }
       ]
@@ -1664,10 +1669,6 @@
               "name": "induction"
             },
             {
-              "type": "STRING",
-              "value": "\n"
-            },
-            {
               "type": "SYMBOL",
               "name": "step"
             },
@@ -1682,10 +1683,6 @@
             {
               "type": "SYMBOL",
               "name": "StmtL"
-            },
-            {
-              "type": "STRING",
-              "value": "\n"
             },
             {
               "type": "SYMBOL",
@@ -1710,10 +1707,6 @@
             {
               "type": "SYMBOL",
               "name": "StmtL"
-            },
-            {
-              "type": "STRING",
-              "value": "\n"
             },
             {
               "type": "SYMBOL",

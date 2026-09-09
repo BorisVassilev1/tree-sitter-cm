@@ -39,10 +39,6 @@
           "named": true
         },
         {
-          "type": "Char",
-          "named": true
-        },
-        {
           "type": "Expr",
           "named": true
         },
@@ -345,7 +341,32 @@
   {
     "type": "IndId",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "IndIdTag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "IndIdTag",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "Natural",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "MulOp",
@@ -609,10 +630,6 @@
     }
   },
   {
-    "type": "\n",
-    "named": false
-  },
-  {
     "type": "!",
     "named": false
   },
@@ -661,10 +678,6 @@
     "named": false
   },
   {
-    "type": "0",
-    "named": false
-  },
-  {
     "type": ":",
     "named": false
   },
@@ -693,10 +706,6 @@
     "named": false
   },
   {
-    "type": "Char",
-    "named": true
-  },
-  {
     "type": "Comment",
     "named": true,
     "extra": true
@@ -718,7 +727,7 @@
     "named": false
   },
   {
-    "type": "\\\\",
+    "type": "\\",
     "named": false
   },
   {
