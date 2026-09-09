@@ -40,5 +40,19 @@
 (Btype (Natural) @type)
 
 (Comment) @comment
-;(ERROR) @comment.error
+
+; Error highlighting.
+;
+; A failed parse produces nested ERROR nodes: a huge outer one (often the whole
+; file / large multi-line spans) plus small inner ones around the token that
+; actually tripped the parser. Flagging the big ones just paints the buffer
+; red and says nothing, so we keep only single-line ERROR nodes - that lands
+; the highlight on (or very close to) the real problem. `#not-match?` is
+; understood by both Neovim and the `tree-sitter` CLI.
+((ERROR) @comment.error
+  (#not-match? @comment.error "[\r\n]"))
+
+; A MISSING node marks the exact spot where the parser expected a token that
+; was not supplied (shows up in :Inspect even though it is zero-width).
+(MISSING) @comment.error
 

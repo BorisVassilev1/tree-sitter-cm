@@ -10,7 +10,10 @@
         "cm"
       ],
       "injection-regex": "^cm$",
-      "class-name": "TreeSitterCm"
+      "class-name": "TreeSitterCm",
+      "highlights": [
+        "queries/highlights.scm"
+      ]
     }
   ],
   "metadata": {
@@ -24,7 +27,7 @@
       }
     ],
     "links": {
-      "repository": "https://github.com/tree-sitter/tree-sitter-cm"
+      "repository": "https://github.com/BorisVassilev1/tree-sitter-cm"
     }
   },
   "bindings": {

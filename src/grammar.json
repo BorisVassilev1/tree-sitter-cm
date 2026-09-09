@@ -750,43 +750,51 @@
                         "type": "CHOICE",
                         "members": [
                           {
-                            "type": "SEQ",
+                            "type": "CHOICE",
                             "members": [
                               {
-                                "type": "STRING",
-                                "value": ","
+                                "type": "SEQ",
+                                "members": [
+                                  {
+                                    "type": "STRING",
+                                    "value": ","
+                                  },
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "Exprl"
+                                  }
+                                ]
                               },
                               {
-                                "type": "SYMBOL",
-                                "name": "Exprl"
+                                "type": "SEQ",
+                                "members": [
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "dd"
+                                  },
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "Expr"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "SEQ",
+                                "members": [
+                                  {
+                                    "type": "STRING",
+                                    "value": "|"
+                                  },
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "TermExprl"
+                                  }
+                                ]
                               }
                             ]
                           },
                           {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "SYMBOL",
-                                "name": "dd"
-                              },
-                              {
-                                "type": "SYMBOL",
-                                "name": "Expr"
-                              }
-                            ]
-                          },
-                          {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "STRING",
-                                "value": "|"
-                              },
-                              {
-                                "type": "SYMBOL",
-                                "name": "TermExprl"
-                              }
-                            ]
+                            "type": "BLANK"
                           }
                         ]
                       }
@@ -824,43 +832,51 @@
                         "type": "CHOICE",
                         "members": [
                           {
-                            "type": "SEQ",
+                            "type": "CHOICE",
                             "members": [
                               {
-                                "type": "STRING",
-                                "value": ","
+                                "type": "SEQ",
+                                "members": [
+                                  {
+                                    "type": "STRING",
+                                    "value": ","
+                                  },
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "Exprl"
+                                  }
+                                ]
                               },
                               {
-                                "type": "SYMBOL",
-                                "name": "Exprl"
+                                "type": "SEQ",
+                                "members": [
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "dd"
+                                  },
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "Expr"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "SEQ",
+                                "members": [
+                                  {
+                                    "type": "STRING",
+                                    "value": "|"
+                                  },
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "TermExprl"
+                                  }
+                                ]
                               }
                             ]
                           },
                           {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "SYMBOL",
-                                "name": "dd"
-                              },
-                              {
-                                "type": "SYMBOL",
-                                "name": "Expr"
-                              }
-                            ]
-                          },
-                          {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "STRING",
-                                "value": "|"
-                              },
-                              {
-                                "type": "SYMBOL",
-                                "name": "TermExprl"
-                              }
-                            ]
+                            "type": "BLANK"
                           }
                         ]
                       }

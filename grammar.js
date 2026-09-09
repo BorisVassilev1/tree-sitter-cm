@@ -101,10 +101,10 @@ module.exports = grammar({
       seq($.func, '(', $.Expr, ',', $.Expr, ',', $.Expr, ')'),
       seq($.if, '(', $.Expr, ',', $.Expr, ',', $.Expr, ')'),
       seq('{', optional(seq($.Expr, 
-        choice(seq(',', $.Exprl), seq($.dd, $.Expr), seq('|', $.TermExprl))
+        optional(choice(seq(',', $.Exprl), seq($.dd, $.Expr), seq('|', $.TermExprl)))
       )), '}'),
       seq('[', optional(seq($.Expr, 
-        choice(seq(',', $.Exprl), seq($.dd, $.Expr), seq('|', $.TermExprl))
+        optional(choice(seq(',', $.Exprl), seq($.dd, $.Expr), seq('|', $.TermExprl)))
       )), ']'),
       seq($.opmat, $.Expr, optional(choice(
         seq(',', $.Exprl),
