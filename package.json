@@ -1,6 +1,6 @@
 {
   "name": "@borisvassilev1/tree-sitter-cm",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "C(m) grammar for tree-sitter",
   "repository": {
     "type": "git",
