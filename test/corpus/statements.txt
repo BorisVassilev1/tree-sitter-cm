@@ -1,0 +1,317 @@
+==================
+Type alias
+==================
+
+WORD is SYMBOL^*;
+
+---
+
+(source_file
+  (StmtL
+    (Stmt
+      (TermL
+        (Term
+          (Id)))
+      (is)
+      (Type
+        (Dtype
+          (Ctype
+            (Btype
+              (Id))))))))
+
+==================
+Function signature and definition
+==================
+
+error in IN*STRING -> IN;
+error(l,msg) := l;
+
+---
+
+(source_file
+  (StmtL
+    (Stmt
+      (TermL
+        (Term
+          (Id)))
+      (in)
+      (Type
+        (Dtype
+          (Ctype
+            (Btype
+              (Id)))
+          (Ctype
+            (Btype
+              (Id))))
+        (arrow)
+        (Dtype
+          (Ctype
+            (Btype
+              (Id))))))
+    (Stmt
+      (TermL
+        (Term
+          (Id)))
+      (Term
+        (TermL
+          (Term
+            (Id))
+          (Term
+            (Id))))
+      (def)
+      (Assignment
+        (Expr
+          (Aexpr
+            (Id)))))))
+
+==================
+Case expression
+==================
+
+h2n(d) :=
+	? d-'0' if (d>='0')/\(d<='9')
+	? 0 otherwise;
+
+---
+
+(source_file
+  (StmtL
+    (Stmt
+      (TermL
+        (Term
+          (Id)))
+      (Term
+        (TermL
+          (Term
+            (Id))))
+      (def)
+      (Assignment
+        (Expr
+          (Aexpr
+            (Case
+              (Expr
+                (Aexpr
+                  (Id))
+                (AddOp)
+                (Aexpr
+                  (Natural)))
+              (if)
+              (Expr
+                (Aexpr
+                  (Exprl
+                    (Expr
+                      (Aexpr
+                        (Id))
+                      (EqOp
+                        (ge))
+                      (Aexpr
+                        (Natural)))))
+                (AddOp
+                  (cap))
+                (Aexpr
+                  (Exprl
+                    (Expr
+                      (Aexpr
+                        (Id))
+                      (EqOp
+                        (le))
+                      (Aexpr
+                        (Natural))))))
+              (Case
+                (Expr
+                  (Aexpr
+                    (Natural)))
+                (otherwise)))))))))
+
+==================
+Induction with multi-statement step
+==================
+
+f(x) := v, where
+	(v,l) := induction
+		step 0: (v@0,l@0) := ([],p);
+		step i+1:
+			(c,l@i+1) := g(F,l@i);
+			v@i+1 := v@i . [c];
+		until i=|F|
+		;
+	;
+
+---
+
+(source_file
+  (StmtL
+    (Stmt
+      (TermL
+        (Term
+          (Id)))
+      (Term
+        (TermL
+          (Term
+            (Id))))
+      (def)
+      (Assignment
+        (Expr
+          (Aexpr
+            (Id)))
+        (where)
+        (StmtL
+          (Stmt
+            (TermL
+              (Term
+                (TermL
+                  (Term
+                    (Id))
+                  (Term
+                    (Id)))))
+            (def)
+            (Assignment
+              (induction)
+              (step)
+              (Natural)
+              (StmtL
+                (Stmt
+                  (TermL
+                    (Term
+                      (TermL
+                        (Term
+                          (IndId
+                            (IndIdTag
+                              (Natural))))
+                        (Term
+                          (IndId
+                            (IndIdTag
+                              (Natural)))))))
+                  (def)
+                  (Assignment
+                    (Expr
+                      (Aexpr
+                        (Exprl
+                          (Expr
+                            (Aexpr))
+                          (Expr
+                            (Aexpr
+                              (Id)))))))))
+              (step)
+              (Id)
+              (Natural)
+              (StmtL
+                (Stmt
+                  (TermL
+                    (Term
+                      (TermL
+                        (Term
+                          (Id))
+                        (Term
+                          (IndId
+                            (IndIdTag))))))
+                  (def)
+                  (Assignment
+                    (Expr
+                      (Aexpr
+                        (Id))
+                      (PosOp
+                        (Exprl
+                          (Expr
+                            (Aexpr
+                              (Id)))
+                          (Expr
+                            (Aexpr
+                              (IndId
+                                (IndIdTag)))))))))
+                (Stmt
+                  (TermL
+                    (Term
+                      (IndId
+                        (IndIdTag))))
+                  (def)
+                  (Assignment
+                    (Expr
+                      (Aexpr
+                        (IndId
+                          (IndIdTag)))
+                      (MulOp)
+                      (Aexpr
+                        (Expr
+                          (Aexpr
+                            (Id))))))))
+              (until)
+              (Expr
+                (Aexpr
+                  (Id))
+                (EqOp)
+                (Aexpr
+                  (Expr
+                    (Aexpr
+                      (Id))))))))))))
+
+==================
+Comprehension and ranges
+==================
+
+s := { h2n(x) | x in {1..8} };
+
+---
+
+(source_file
+  (StmtL
+    (Stmt
+      (TermL
+        (Term
+          (Id)))
+      (def)
+      (Assignment
+        (Expr
+          (Aexpr
+            (Expr
+              (Aexpr
+                (Id))
+              (PosOp
+                (Exprl
+                  (Expr
+                    (Aexpr
+                      (Id))))))
+            (TermExprl
+              (TermExpr
+                (Term
+                  (Id))
+                (in)
+                (Expr
+                  (Aexpr
+                    (Expr
+                      (Aexpr
+                        (Natural)))
+                    (dd)
+                    (Expr
+                      (Aexpr
+                        (Natural)))))))))))))
+
+==================
+Supplementary action
+==================
+
+print <- "hi".str(n)."\n";
+
+---
+
+(source_file
+  (StmtL
+    (Stmt
+      (TermL
+        (Term
+          (Id)))
+      (larrow)
+      (Expr
+        (Aexpr
+          (String))
+        (MulOp)
+        (Aexpr
+          (Id))
+        (PosOp
+          (Exprl
+            (Expr
+              (Aexpr
+                (Id)))))
+        (MulOp)
+        (Aexpr
+          (String))))))

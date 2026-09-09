@@ -1,0 +1,14 @@
+WORD is SYMBOL;
+// <- @type.definition
+
+y := Proj(1,x);
+//   ^ @function.builtin
+
+ok := true;
+//    ^ @boolean
+
+dump <- E;
+// <- @keyword
+
+import <- "lib.cm";
+// <- @keyword.import

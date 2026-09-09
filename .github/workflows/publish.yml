@@ -1,0 +1,122 @@
+name: Publish
+
+# Tag a release to trigger this:
+#   npm version patch      # bumps package.json, makes a v0.1.1 commit + tag
+#   git push --follow-tags
+#
+# Requires one repository secret:
+#   NPM_TOKEN  – an npm automation token with publish rights for the package
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write   # create the GitHub release
+  id-token: write   # npm provenance attestation
+
+jobs:
+  check:
+    name: Pre-flight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+
+      - name: Tag must match package.json version
+        run: |
+          want="v$(node -p 'require("./package.json").version')"
+          got="${{ github.ref_name }}"
+          if [ "$want" != "$got" ]; then
+            echo "::error::tag $got does not match package.json ($want)"
+            exit 1
+          fi
+
+      - name: Committed parser is up to date
+        run: |
+          npx tree-sitter generate
+          git diff --exit-code -- src/grammar.json src/node-types.json src/parser.c
+
+      - name: Corpus & highlight tests
+        run: npx tree-sitter test
+
+  prebuild:
+    name: Prebuild ${{ matrix.target }}
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04,     target: linux-x64    }
+          - { os: ubuntu-22.04-arm, target: linux-arm64  }   # free arm runners: public repos only
+          - { os: macos-13,         target: darwin-x64   }
+          - { os: macos-14,         target: darwin-arm64 }
+          - { os: windows-latest,   target: win32-x64    }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps (no lifecycle scripts)
+        run: npm install --ignore-scripts
+
+      - name: Build prebuilt binary
+        run: npx prebuildify --napi --strip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prebuild-${{ matrix.target }}
+          path: prebuilds/
+          if-no-files-found: error
+
+  publish-npm:
+    name: Publish to npm
+    needs: prebuild
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - run: npm install
+
+      - name: Gather prebuilt binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: prebuild-*
+          path: prebuilds/
+          merge-multiple: true
+
+      - name: Build tree-sitter-cm.wasm
+        run: npx tree-sitter build --wasm
+
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tree-sitter-cm-wasm
+          path: tree-sitter-cm.wasm
+
+  github-release:
+    name: GitHub release
+    needs: publish-npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tree-sitter-cm-wasm
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" tree-sitter-cm.wasm --generate-notes --verify-tag

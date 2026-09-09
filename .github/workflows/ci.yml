@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  grammar:
+    name: Grammar, queries & tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Regenerate parser
+        run: npx tree-sitter generate
+
+      - name: Check committed parser is up to date
+        # src/tree_sitter/*.h is vendored runtime and its formatting drifts
+        # between CLI patch releases, so only the real outputs are checked.
+        run: |
+          if ! git diff --exit-code -- src/grammar.json src/node-types.json src/parser.c; then
+            echo "::error::src/ is out of date — run 'tree-sitter generate' and commit the result"
+            exit 1
+          fi
+
+      - name: Corpus & highlight tests
+        run: npx tree-sitter test
+
+      - name: Parse the example programs
+        run: npx tree-sitter parse --quiet --stat test.cm traversePacked.cm
+        # asd.cm is a deliberate error fixture and is intentionally excluded
+
+  bindings:
+    name: Node binding (${{ matrix.os }}, node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install & build native binding
+        run: npm install
+
+      - name: Test
+        run: npm test
+
+  wasm:
+    name: Wasm build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build tree-sitter-cm.wasm
+        run: npx tree-sitter build --wasm
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tree-sitter-cm-wasm
+          path: tree-sitter-cm.wasm
+          if-no-files-found: error
