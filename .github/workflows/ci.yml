@@ -17,7 +17,7 @@ jobs:
     name: Grammar, queries & tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -59,7 +59,7 @@ jobs:
         os: [ubuntu-latest, windows-2022]
         node: [18, 20, 22]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -75,7 +75,7 @@ jobs:
     name: Wasm build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
