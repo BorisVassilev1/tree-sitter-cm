@@ -90,11 +90,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
 
-      - name: npm >= 11.5.1 (OIDC Trusted Publishing support)
-        run: npm install -g npm@latest
+      - name: npm 11 (needed for OIDC Trusted Publishing; 11.5.1+)
+        run: npm install -g npm@11
 
       - run: npm install
 
