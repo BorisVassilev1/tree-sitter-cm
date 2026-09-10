@@ -87,7 +87,7 @@ jobs:
       - name: Build tree-sitter-cm.wasm
         run: npx tree-sitter build --wasm
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: tree-sitter-cm-wasm
           path: tree-sitter-cm.wasm
