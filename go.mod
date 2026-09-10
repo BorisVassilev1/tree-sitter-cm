@@ -1,4 +1,4 @@
-module github.com/tree-sitter/tree-sitter-cm
+module github.com/BorisVassilev1/tree-sitter-cm
 
 go 1.22
 

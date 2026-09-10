@@ -1,5 +1,5 @@
 {
-  "name": "@borisvassilev1/tree-sitter-cm",
+  "name": "tree-sitter-cmlang",
   "version": "0.1.5",
   "description": "C(m) grammar for tree-sitter",
   "repository": {
@@ -7,9 +7,6 @@
     "url": "git+https://github.com/BorisVassilev1/tree-sitter-cm.git"
   },
   "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
   "author": {
     "name": "Boris Vassilev",
     "email": "boris.n.vassilev@gmail.com"
