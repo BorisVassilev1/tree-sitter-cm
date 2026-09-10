@@ -101,7 +101,7 @@ jobs:
       - name: Build tree-sitter-cm.wasm
         run: npx tree-sitter build --wasm
 
-      - run: npm publish --provenance
+      - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

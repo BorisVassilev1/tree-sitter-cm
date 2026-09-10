@@ -7,6 +7,9 @@
     "url": "git+https://github.com/BorisVassilev1/tree-sitter-cm.git"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "author": {
     "name": "Boris Vassilev",
     "email": "boris.n.vassilev@gmail.com"
