@@ -101,6 +101,16 @@ jobs:
       - name: Build tree-sitter-cm.wasm
         run: npx tree-sitter build --wasm
 
+      - name: Verify npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::the NPM_TOKEN repository secret is empty or unset"
+            exit 1
+          fi
+          echo "Publishing as: $(npm whoami)"
+
       - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
