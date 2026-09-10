@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-cmlang",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "C(m) grammar for tree-sitter",
   "repository": {
     "type": "git",
