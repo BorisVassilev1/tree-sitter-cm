@@ -4,8 +4,12 @@ name: Publish
 #   npm version patch      # bumps package.json, makes a v0.1.1 commit + tag
 #   git push --follow-tags
 #
-# Requires one repository secret:
-#   NPM_TOKEN  – an npm automation token with publish rights for the package
+# Auth to npm is via OIDC "Trusted Publishing" — no token/secret. One-time setup:
+#   1. Publish the package once manually (`npm publish --access public`) so it exists.
+#   2. npmjs.com → the package → Settings → Trusted Publisher → GitHub Actions:
+#        Organization / repository:  BorisVassilev1/tree-sitter-cm
+#        Workflow filename:          publish.yml
+#   After that this workflow publishes with zero secrets, provenance included.
 
 on:
   push:
@@ -13,7 +17,7 @@ on:
 
 permissions:
   contents: write   # create the GitHub release
-  id-token: write   # npm provenance attestation
+  id-token: write   # OIDC: npm Trusted Publishing + provenance
 
 jobs:
   check:
@@ -89,6 +93,9 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
 
+      - name: npm >= 11.5.1 (OIDC Trusted Publishing support)
+        run: npm install -g npm@latest
+
       - run: npm install
 
       - name: Gather prebuilt binaries
@@ -101,19 +108,10 @@ jobs:
       - name: Build tree-sitter-cm.wasm
         run: npx tree-sitter build --wasm
 
-      - name: Verify npm auth
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::error::the NPM_TOKEN repository secret is empty or unset"
-            exit 1
-          fi
-          echo "Publishing as: $(npm whoami)"
-
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # No NODE_AUTH_TOKEN — auth is the workflow's OIDC identity, matched
+      # against the Trusted Publisher configured for this package on npmjs.com.
+      # Provenance is attached automatically.
+      - run: npm publish --access public
 
       - uses: actions/upload-artifact@v4
         with:
