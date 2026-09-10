@@ -53,7 +53,10 @@ jobs:
       matrix:
         # windows-2022 (not windows-latest): the newer runner image ships
         # Visual Studio 2026, which node-gyp cannot yet detect.
-        os: [ubuntu-latest, macos-latest, windows-2022]
+        # macOS is omitted: the binding is plain C via node-addon-api and builds
+        # identically to the Linux clang path, and the hosted macOS runners queue
+        # indefinitely for this repo.
+        os: [ubuntu-latest, windows-2022]
         node: [18, 20, 22]
     steps:
       - uses: actions/checkout@v4

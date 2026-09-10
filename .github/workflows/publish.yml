@@ -52,9 +52,13 @@ jobs:
         include:
           - { os: ubuntu-22.04,     target: linux-x64    }
           - { os: ubuntu-22.04-arm, target: linux-arm64  }   # free arm runners: public repos only
-          - { os: macos-13,         target: darwin-x64   }
-          - { os: macos-14,         target: darwin-arm64 }
           - { os: windows-2022,     target: win32-x64    }   # windows-latest has VS 2026, which node-gyp can't detect
+          # No darwin prebuilds: the hosted macOS runners queue indefinitely for
+          # this repo. macOS installs fall back to compiling from src/parser.c on
+          # `npm install` (needs the Xcode command-line tools). Add back when
+          # runners are available:
+          #   - { os: macos-13, target: darwin-x64   }
+          #   - { os: macos-14, target: darwin-arm64 }
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
